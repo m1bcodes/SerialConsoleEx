@@ -12,8 +12,8 @@ TODO: Add a CloneCommendsTo(otherConsole) method for cases on larger boards wher
       commends on serial and telnet, for example.
 */
 
-#ifndef SerialConsole_h
-#define SerialConsole_h
+#ifndef SerialConsoleEx_h
+#define SerialConsoleEx_h
 
 #include <Arduino.h>
 
