@@ -15,6 +15,7 @@ SerialConsole::SerialConsole(const SerialConsoleConfig& cfg) : _config(cfg){
     Triggers = new const char*[_config.numCommands];
     Functions = new Func[_config.numCommands];
     HelpMsg = new const char*[_config.numCommands];
+    FlashHelpMsg = new const __FlashStringHelper *[_config.numCommands];
     Arguments = new char*[_config.maxNumArgs];
     _commandBuffer = new char[_config.maxFullLineLength + 1];
 
@@ -31,6 +32,7 @@ SerialConsole::~SerialConsole(){
     delete[] _commandBuffer;
     delete[] Functions;
     delete[] HelpMsg;
+    delete[] FlashHelpMsg;
     delete[] Triggers;
 }
 
@@ -41,12 +43,18 @@ void SerialConsole::AddCommand(const char* trigger, Func function, const char* h
         Triggers[commandNumber] = trigger;
         Functions[commandNumber] = function;
         HelpMsg[commandNumber] = helpMsg;
+        FlashHelpMsg[commandNumber] = nullptr;
     }
-    else{
-        _config.IO_Stream.print("SerialConsole: ERROR: Could not add command <");
-        _config.IO_Stream.print(trigger);
-        _config.IO_Stream.println("> because the SerialConsole is already full of commands!");
-        _config.IO_Stream.println("Please increase the number of commands with a SerialConsoleConfig when building the SerialConsole. See examples.");
+}
+
+void SerialConsole::AddCommand(const char* trigger, Func function, const __FlashStringHelper *helpMsg){
+    if(_numCommandsDefined < _config.numCommands){
+        int commandNumber = _numCommandsDefined++;
+
+        Triggers[commandNumber] = trigger;
+        Functions[commandNumber] = function;
+        FlashHelpMsg[commandNumber] = helpMsg;
+        HelpMsg[commandNumber] = nullptr;
     }
 }
 
@@ -136,10 +144,12 @@ void SerialConsole::Listen(){
                     for(int i=0; i<_numCommandsDefined; i++){
                         if(strcmp(Arguments[1], Triggers[i]) == 0) {
                             cmdFound = true;
-                            if(HelpMsg[i] != nullptr) _config.IO_Stream.println(HelpMsg[i]);
+                            if(HelpMsg[i] != nullptr)
+                               _config.IO_Stream.println(HelpMsg[i]);
+                            else if(FlashHelpMsg[i] != nullptr)
+                               _config.IO_Stream.println(FlashHelpMsg[i]);
                             else{
-                                _config.IO_Stream.print("SerialConsole: No help message available for command");
-                                _config.IO_Stream.print(": ");
+                                _config.IO_Stream.print(F("SerialConsole: No help message available for command: "));
                                 _config.IO_Stream.println(Triggers[i]);
                             }
                         }
@@ -150,19 +160,22 @@ void SerialConsole::Listen(){
                         if(strcmp(Arguments[0], Triggers[i]) == 0){
                             cmdFound = true;
 
-                            if(Functions[i] == nullptr) _config.IO_Stream.println("SerialConsole: A function with an existing trigger was called, but there is no function associated with the trigger.");
+                            if(Functions[i] == nullptr) {
+                               _config.IO_Stream.print(F("SerialConsole: No trigger associated with "));
+                               _config.IO_Stream.println(Triggers[i]);
+                            }
                             else (Functions[i])();
                         }
                     }
                 }
                 if(!cmdFound){
                     if(strcmp(Arguments[0], "help") != 0){
-                    	_config.IO_Stream.print("SerialConsole: Command """);
+                    	_config.IO_Stream.print(F("SerialConsole: Command """));
                     	_config.IO_Stream.print(Arguments[0]);
-                    	_config.IO_Stream.println(""" not recognized.");
+                    	_config.IO_Stream.println(F(""" not recognized."));
                     }
-                    _config.IO_Stream.println("Type help <command> for help on a specific command.");
-                    _config.IO_Stream.println("Available commands:");
+                    _config.IO_Stream.println(F("Type help <command> for help on a specific command."));
+                    _config.IO_Stream.println(F("Available commands:"));
                     for(int i=0; i<_numCommandsDefined; i++){
                         if(Triggers[i] != nullptr){
                             _config.IO_Stream.print(" - ");_config.IO_Stream.println(Triggers[i]);

@@ -27,7 +27,7 @@ Try entering these commands:
 
 */
 
-#include <SerialConsole.h>
+#include <SerialConsoleEx.h>
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2  // Common default for ESP32, etc.

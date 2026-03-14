@@ -54,11 +54,13 @@ class SerialConsole {
         const char** Triggers; // Array of command string triggers
         Func* Functions; // Array of command functions
         const char** HelpMsg; // Array of help messages
-
+        const __FlashStringHelper **FlashHelpMsg;
         SerialConsole(const SerialConsoleConfig& cfg = SerialConsoleConfig());
         ~SerialConsole();
 
         void AddCommand(const char* trigger, Func function, const char* helpMsg = nullptr);
+        void AddCommand(const char* trigger, Func function, const __FlashStringHelper *helpMsg);
+
         void Listen(); // Check the serial port for traffic. Run commands if applicable.
 
         SerialConsole(const SerialConsole&) = delete;

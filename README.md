@@ -6,6 +6,10 @@ You can bind your own commands to the console like this:
 ```cpp
 console.AddCommand("LED", cmd_LED, "Toggle the builtin LED.");
 ```
+To save SRAM, you can also use the F() macro to provide pointers into flash memory:
+```cpp
+console.AddCommand("LED", cmd_LED, F("Toggle the builtin LED."));
+```
 
 Then you open up the Arduino Serial Monitor, type in LED, and watch it turn on!
 
