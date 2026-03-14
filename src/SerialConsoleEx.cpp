@@ -4,7 +4,7 @@
  */
 
 #include "Arduino.h"
-#include "SerialConsole.h"
+#include "SerialConsoleEx.h"
 
 SerialConsole::SerialConsole(const SerialConsoleConfig& cfg) : _config(cfg){
     _numCommandsDefined = 0;
